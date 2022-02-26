@@ -29,7 +29,6 @@ const Register = ({navigation}) => {
       Alert.alert("Error", "Password should contain at least one of these:\n1. Uppercase letter\n2. Lowercase letter\n3. Number\n4. Special Character", [{text: "OK"}]);
       return;
     }
-    
     try{
       if(await userExists(username)){
         Alert.alert("Error", `Username already taken.`, [{text: "OK"}]);
