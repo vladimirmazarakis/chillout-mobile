@@ -2,14 +2,21 @@ import { Link, useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import {Text, View, StyleSheet, Image, Alert, ActivityIndicator} from 'react-native';
 import {BasicButtonGradient, BasicTextInput, BasicButton} from '../shared/Inputs';
-import { container } from '../shared/Styles';
+import { authContainer } from '../shared/Styles';
 import { useAuth } from '../contexts/AuthContext';
 
-const Login = ({navigation}) => {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [loading, setLoading] = useState(false);
   const {currentUser, signInUserWithEmailAndPassword} = useAuth();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if(currentUser){
+      navigation.navigate('Profile');
+    }
+  }, [currentUser]);
 
   const handleSignIn = () => {
     try{
@@ -26,7 +33,7 @@ const Login = ({navigation}) => {
   };
 
   return (
-    <View style={container}>
+    <View style={authContainer}>
     <Image source={require('../assets/ChillOut_Logo.png')} style={{width: 200, height:75, resizeMode:'cover'}}/>
     <BasicTextInput plHolder='Email' setState={setEmail} value={email} autoComplete="email" multiline={false}/>
     <BasicTextInput plHolder='Password' isPassword={true} setState={setPass} value={pass} autoComplete="password" type="password" multiline={false}/>

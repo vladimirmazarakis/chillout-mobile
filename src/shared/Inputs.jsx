@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextInput, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { TextInput, StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const BasicTextInput = ({plHolder, setState, valueState, isPassword, ...rest}) => {
@@ -21,12 +21,30 @@ BasicTextInput.defaultProps = {
     isPassword: false
 }
 
-const BasicButtonGradient = ({title,width,onPress,...rest}) => {
-    const basicButtonText = {
+const BasicButtonGradient = ({title,width,onPress,disabled,...rest}) => {
+    const textStyle = {
         color: 'black',
         textAlign: 'center',
+        fontFamily: 'Rubik'
     };
-    const basicButtonGradient = {
+    const buttonStyle = {
+        marginVertical: 5,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        alignItems: 'center',
+        borderRadius: 30,
+        width: width,
+        cursor: 'pointer',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.23,
+        shadowRadius: 2.62,
+        elevation: 4,
+    };
+    const disabledButtonStyle = {
         marginVertical: 5,
         paddingHorizontal: 10,
         paddingVertical: 5,
@@ -44,9 +62,9 @@ const BasicButtonGradient = ({title,width,onPress,...rest}) => {
         elevation: 4,
     };
     return(
-        <TouchableOpacity onPress={onPress}>
-            <LinearGradient style={basicButtonGradient} colors={['#CFFFD3', '#FEFFC3']}>
-            <Text style={basicButtonText} rest>{title}</Text>
+        <TouchableOpacity disabled={disabled} onPress={onPress}>
+            <LinearGradient style={disabled ? disabledButtonStyle : buttonStyle} colors={disabled ? ['#d3d3d3', '#d3d3d3'] : ['#CFFFD3', '#FEFFC3']}>
+            <Text style={textStyle} {...rest}>{title}</Text>
             </LinearGradient>
         </TouchableOpacity>
     )
@@ -78,7 +96,7 @@ const BasicButton = ({title, bgColor,width, onPress, ...rest}) => {
     return(
         <TouchableOpacity onPress={onPress}>
             <View style={basicButtonView}>
-                <Text style={basicButtonText} rest>{title}</Text>
+                <Text style={basicButtonText} {...rest}>{title}</Text>
             </View>
         </TouchableOpacity>
     )
