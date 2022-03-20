@@ -99,14 +99,14 @@ const ProfileVisit = ({route}) => {
                         </View>
                         <View style={userInfo.middle}>
                             <View style={userInfo.middleLeft}>
-                                <Text style={userInfo.text}>Followers{"\n"}</Text>
+                                <Text style={userInfo.text}>Followers</Text>
                                 <FollowCountText count={user.followersCount} style={userInfo.text}/>
                             </View>
                             <View style={userInfo.middleMiddle}>
                                 {user.avatar && <Image style={userInfo.middleMiddleImage} source={{uri: user.avatar}}/>}
                             </View>
                             <View style={userInfo.middleRight}>
-                                <Text style={userInfo.text}>Following{"\n"}</Text>
+                                <Text style={userInfo.text}>Following</Text>
                                 <FollowCountText count={user.followingCount} style={userInfo.text}/>
                             </View>
                         </View>
@@ -141,7 +141,8 @@ const ProfileVisit = ({route}) => {
 const userInfo = StyleSheet.create({
     text:{
         textAlign: 'center',
-        fontFamily: 'Rubik'
+        fontFamily: 'Rubik',
+        fontSize: 14
     },
     displayName:{
         fontSize: 15,

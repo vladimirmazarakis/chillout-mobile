@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, onAuthStateChanged, signInWithCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword, AuthCredential, getAdditionalUserInfo } from 'firebase/auth';
+import { GoogleAuthProvider, onAuthStateChanged, signInWithCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword, AuthCredential, getAdditionalUserInfo, updateEmail } from 'firebase/auth';
 import React, { useContext, useEffect, useState } from 'react'
 import { auth } from '../firebase/config';
 import * as Google from 'expo-auth-session/providers/google';
@@ -23,6 +23,10 @@ const AuthProvider = ({children}) => {
 
     const signInUserWithCredential = async() =>{
         await promptAsync();
+    };
+
+    const updateUserEmail = async(newEmail) => {
+        await updateEmail(currentUser, newEmail);
     };
 
     useEffect(() => {
@@ -74,7 +78,8 @@ const AuthProvider = ({children}) => {
         signUpUserWithEmailAndPassword,
         signInUserWithEmailAndPassword,
         signInUserWithCredential,
-        updateCurrentUserInfo
+        updateCurrentUserInfo,
+        updateUserEmail
     };
 
     return (

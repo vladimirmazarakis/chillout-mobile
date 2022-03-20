@@ -2,7 +2,7 @@ import React from 'react'
 import { TextInput, StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const BasicTextInput = ({plHolder, setState, valueState, isPassword, ...rest}) => {
+const BasicTextInput = ({plHolder, setState, valueState, isPassword, selectionColor, ...rest}) => {
     const basicTextInput = {
         color: 'black',
         backgroundColor: '#F2F2E9',
@@ -10,15 +10,17 @@ const BasicTextInput = ({plHolder, setState, valueState, isPassword, ...rest}) =
         paddingVertical: 5,
         borderRadius: 30,
         width: 250,
-        marginVertical: 3
+        marginVertical: 3,
+        fontFamily: 'Rubik'
     }
     return(
-        <TextInput placeholder={plHolder} onChangeText={(text) => setState(text)} value={valueState} style={basicTextInput} placeholderTextColor='#DDDDD5' secureTextEntry={isPassword} rest/>
+        <TextInput placeholder={plHolder} onChangeText={(text) => setState(text)} selectionColor={selectionColor} value={valueState} style={basicTextInput} placeholderTextColor='#DDDDD5' secureTextEntry={isPassword} {...rest}/>
     )
 };
 
 BasicTextInput.defaultProps = {
-    isPassword: false
+    isPassword: false,
+    selectionColor: '#F580F8'
 }
 
 const BasicButtonGradient = ({title,width,onPress,disabled,...rest}) => {
@@ -63,7 +65,7 @@ const BasicButtonGradient = ({title,width,onPress,disabled,...rest}) => {
     };
     return(
         <TouchableOpacity disabled={disabled} onPress={onPress}>
-            <LinearGradient style={disabled ? disabledButtonStyle : buttonStyle} colors={disabled ? ['#d3d3d3', '#d3d3d3'] : ['#CFFFD3', '#FEFFC3']}>
+            <LinearGradient style={disabled ? disabledButtonStyle : buttonStyle} colors={disabled ? ['#d3d3d3', '#d3d3d3'] : ['#F580F8', '#F580F8']}>
             <Text style={textStyle} {...rest}>{title}</Text>
             </LinearGradient>
         </TouchableOpacity>
@@ -73,6 +75,7 @@ const BasicButtonGradient = ({title,width,onPress,disabled,...rest}) => {
 const BasicButton = ({title, bgColor,width, onPress, ...rest}) => {
     const basicButtonText = {
         textAlign: 'center',
+        fontFamily: 'Rubik'
     }
     const basicButtonView = {
         marginVertical: 5,

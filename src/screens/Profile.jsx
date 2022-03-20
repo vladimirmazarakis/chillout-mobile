@@ -1,30 +1,23 @@
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { StyleSheet, Text, View, Image, ScrollView, SafeAreaView, RefreshControl, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, SafeAreaView, RefreshControl, Alert, Pressable } from 'react-native';
 import { container } from '../shared/Styles';
 import { Icon } from 'react-native-elements';
 import {BasicButtonGradient} from '../shared/Inputs'
 import { useUsers } from '../hooks/firestoreHooks';
+import FollowCountText from '../comps/FollowCountText';
 
-const Profile = ({route}) => {
+const Profile = ({navigation,route}) => {
     const { currentUser, currentUserInfo, updateCurrentUserInfo } = useAuth();
     const [refreshing, setRefreshing] = useState(false);
-    const navigation = useNavigation();
     const {getUserByUsername} = useUsers();
-
     if(!currentUser){
         navigation.navigate('Registration');
     }
 
-    const onRefresh = () => {
-        setRefreshing(true);
-        updateCurrentUserInfo();
-        setRefreshing(false);
-    };
-
-    const onFollowPress = () => {
-
+    const onSettingsPress = () => {
+        navigation.navigate('EditProfile');
     };
 
     const navigateToOtherProfile = () => {
@@ -33,26 +26,25 @@ const Profile = ({route}) => {
 
     return (
         <SafeAreaView style={container}>
-            <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} style={userInfo.main}>
+            <ScrollView style={userInfo.main}>
                 <View style={userInfo.top}>
                     <View style={userInfo.topMiddle}>
-                        <Icon name="settings"/>
+                        <Pressable onPress={onSettingsPress}><Icon name="settings"/></Pressable>
                         <Text style={userInfo.topMiddleUsernameText} adjustsFontSizeToFit={true}>{currentUserInfo.username}</Text>
-                        <Icon name="keyboard-arrow-down"/>
-                    </View>
-                    <View style={userInfo.topRight}>
-                        <Icon name="notifications"/>
+                        {currentUserInfo.isVerified && <Icon style={userInfo.verifiedIcon} name="verified" color="#F580F8"/>}
                     </View>
                 </View>
                 <View style={userInfo.middle}>
                     <View style={userInfo.middleLeft}>
-                        <Text style={userInfo.text}>Followers{"\n"}{currentUserInfo.followersCount}</Text>
+                        <Text style={userInfo.text}>Followers</Text>
+                        <FollowCountText count={currentUserInfo.followersCount} style={userInfo.text}/>
                     </View>
                     <View style={userInfo.middleMiddle}>
                         {currentUserInfo.avatar && <Image style={userInfo.middleMiddleImage} source={{uri: currentUserInfo.avatar}}/>}
                     </View>
                     <View style={userInfo.middleRight}>
-                        <Text style={userInfo.text}>Following{"\n"}{currentUserInfo.followingCount}</Text>
+                        <Text style={userInfo.text}>Following</Text>
+                        <FollowCountText count={currentUserInfo.followingCount} style={userInfo.text}/>
                     </View>
                 </View>
                 <View style={userInfo.preBottom}>
@@ -69,14 +61,10 @@ const Profile = ({route}) => {
                     </View>
                 </View>
                 <View style={userInfo.bottom}>
-                    <View style={userInfo.middle}>
-                        <BasicButtonGradient width={200} title="Follow" onPress={onFollowPress}/>
-                    </View>
                 </View>
                 {/* <View style={{ width: '100%',backgroundColor: "red" }}>
                     <Text>Test</Text>
                 </View> */}
-                <BasicButtonGradient width={200} title="Navigate" onPress={navigateToOtherProfile}/>
             </ScrollView>
         </SafeAreaView>
     )
@@ -104,14 +92,20 @@ const userInfo = StyleSheet.create({
         alignSelf: 'center',
         justifyContent: 'center'
     },
+    verifiedIcon: {
+        shadowColor: "#F580F8",
+        shadowOffset: {
+        width: 0,
+        height: 18,
+        },
+        shadowOpacity:  0.25,
+        shadowRadius: 20.00,
+        elevation: 24
+    },
     topMiddleUsernameText:{
         fontSize: 20,
         marginHorizontal: 10,
         fontFamily: 'Rubik'
-    },
-    topRight:{
-        position: 'absolute',
-        right: 0
     },
     middle:{
         flexDirection: 'row',

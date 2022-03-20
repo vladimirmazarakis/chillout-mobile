@@ -15,7 +15,7 @@ const useNumbers = () => {
           newValue /= 1000;
           suffixNum++;
         }
-        newValue = newValue.toPrecision(3);
+        newValue = newValue?.toPrecision(3);
         newValue += suffixes[suffixNum];
         return newValue;
     };

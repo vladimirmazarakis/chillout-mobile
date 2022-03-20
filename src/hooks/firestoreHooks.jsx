@@ -123,6 +123,42 @@ const useUsers = () => {
         const document = await getDoc(followDocRef);
         return document.exists();
     }
-    return { getUsers, addUser, userExists, getUserByEmail, getUserByUsername, followUser, unfollowUser, isFollowingUser }
+    
+    /**
+     * Updates user's avatar.
+     * @param {*} User to change avatar. 
+     * @param {*} Avatar Url.
+     */
+    const updateUserAvatar = async(user, avatarURL) => {
+        const userQuery = query(collection(firestore, 'users'), where("username", "==", user));
+        const userDocSnap = (await getDocs(userQuery)).docs[0];
+        await updateDoc(userDocSnap.ref, {
+            avatar: avatarURL
+        });
+    };
+
+    const updateUserUsername = async(currentUsername, newUsername) => {
+        // check if username already taken.
+        let exists = await userExists(newUsername);
+        if(exists){
+            return "Username already taken!";
+        }
+        const userQuery = query(collection(firestore, 'users'), where("username", '==', currentUsername));
+        const userDocSnap = (await getDocs(userQuery)).docs[0];
+        await updateDoc(userDocSnap.ref, {
+            username: newUsername
+        });
+        return 'Ok';
+    };
+
+    const updateUserDisplayName = async(username, newDisplayName) => {
+        const userQuery = query(collection(firestore, 'users'), where("username", '==', username));
+        const userDocSnap = (await getDocs(userQuery)).docs[0];
+        await updateDoc(userDocSnap.ref, {
+            displayName: newDisplayName
+        });
+    };
+
+    return { getUsers, addUser, userExists, getUserByEmail, getUserByUsername, followUser, unfollowUser, isFollowingUser, updateUserAvatar, updateUserUsername, updateUserDisplayName }
 }
 export { useUsers }

@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {Text, View, StyleSheet, Image, Alert, ActivityIndicator} from 'react-native';
 import {BasicButtonGradient, BasicTextInput, BasicButton} from '../shared/Inputs';
 import { authContainer } from '../shared/Styles';
-import { validateEmail, validatePass } from '../shared/Validations';
 import { useAuth } from '../contexts/AuthContext';
 import { useUsers } from '../hooks/firestoreHooks';
+import useValidations from '../shared/Validations'
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -13,9 +13,14 @@ const Register = () => {
   const [pass, setPass] = useState('');
   const [confPass, setConfPass] = useState('');
   const [loading, setLoading] = useState(false);
+  const {validateEmail, validatePass} = useValidations();
   const {currentUser, signUpUserWithEmailAndPassword, signInUserWithCredential} = useAuth();
   const { userExists } = useUsers();
   const navigation = useNavigation();
+
+  if(currentUser){
+    navigation.navigate('Profile');
+  }
 
   useEffect(() => {
     if(currentUser){
