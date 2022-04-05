@@ -16,7 +16,7 @@ export default function App() {
   })
 
   LogBox.ignoreLogs(['Setting a timer']);
-  LogBox.ignoreLogs(['Async storage']);
+  LogBox.ignoreLogs(['AsyncStorage']);
 
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();

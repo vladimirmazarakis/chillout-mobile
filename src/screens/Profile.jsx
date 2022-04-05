@@ -1,76 +1,121 @@
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { StyleSheet, Text, View, Image, ScrollView, SafeAreaView, RefreshControl, Alert, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, SafeAreaView, RefreshControl, Alert, Pressable, Animated } from 'react-native';
 import { container } from '../shared/Styles';
 import { Icon } from 'react-native-elements';
 import {BasicButtonGradient} from '../shared/Inputs'
-import { useUsers } from '../hooks/firestoreHooks';
+import { usePosts, useUsers } from '../hooks/firestoreHooks';
 import FollowCountText from '../comps/FollowCountText';
+import Hr from '../comps/Hr'
+import {defText} from '../shared/Styles'
+import { Loading } from '../comps/Loading';
+import Post from '../comps/Post';
 
 const Profile = ({navigation,route}) => {
     const { currentUser, currentUserInfo, updateCurrentUserInfo } = useAuth();
-    const [refreshing, setRefreshing] = useState(false);
-    const {getUserByUsername} = useUsers();
+    const { getUserPosts, toggleLikeOnPost } = usePosts();
+    const { getUserByUsername } = useUsers();
+    const [postsLoading, setPostsLoading] = useState(true);
+    const [userPosts, setUserPosts] = useState([]);
+    const [forceRefresh, setForceRefresh] = useState(false);
+
     if(!currentUser){
         navigation.navigate('Registration');
     }
+
+    setTimeout(() => {
+        updateCurrentUserInfo();
+    }, 30000);
+    
+    useEffect(() => {
+        const getPosts = async() => {
+            if(postsLoading){
+                let psts = await getUserPosts(currentUserInfo.username, currentUserInfo.username);
+                setUserPosts(psts);
+                setPostsLoading(false);
+            }
+        }
+        getPosts();
+    }, [userPosts]);
 
     const onSettingsPress = () => {
         navigation.navigate('EditProfile');
     };
 
-    const navigateToOtherProfile = () => {
-        navigation.navigate('ProfileVisit', {username: 'Test'});
-    }
+    const onLikePress = async(post) => {
+        post.likes = !post.likes;
+        toggleLikeOnPost(currentUserInfo.username, post.path);
+        setForceRefresh(!forceRefresh);
+    };
+
+    const onImageDoubleTap = async(post) => {
+        if(post.likes){
+            return;
+        }
+        post.likes = true;
+        toggleLikeOnPost(currentUserInfo.username, post.path);
+        setForceRefresh(!forceRefresh);
+    };
 
     return (
         <SafeAreaView style={container}>
-            <ScrollView style={userInfo.main}>
-                <View style={userInfo.top}>
-                    <View style={userInfo.topMiddle}>
+            <ScrollView style={userInfoStyles.main} showsVerticalScrollIndicator={false}>
+                <View style={userInfoStyles.top}>
+                    <View style={userInfoStyles.topMiddle}>
                         <Pressable onPress={onSettingsPress}><Icon name="settings"/></Pressable>
-                        <Text style={userInfo.topMiddleUsernameText} adjustsFontSizeToFit={true}>{currentUserInfo.username}</Text>
-                        {currentUserInfo.isVerified && <Icon style={userInfo.verifiedIcon} name="verified" color="#F580F8"/>}
+                        <Text style={userInfoStyles.topMiddleUsernameText} adjustsFontSizeToFit={true}>{currentUserInfo.username}</Text>
+                        {currentUserInfo.isVerified && <Image style={userInfoStyles.verifiedIcon} source={require('../assets/verify.png')}/>}
                     </View>
                 </View>
-                <View style={userInfo.middle}>
-                    <View style={userInfo.middleLeft}>
-                        <Text style={userInfo.text}>Followers</Text>
-                        <FollowCountText count={currentUserInfo.followersCount} style={userInfo.text}/>
+                <View style={userInfoStyles.middle}>
+                    <View style={userInfoStyles.middleLeft}>
+                        <Text style={userInfoStyles.text}>Followers</Text>
+                        <FollowCountText count={currentUserInfo.followersCount} style={userInfoStyles.text}/>
                     </View>
-                    <View style={userInfo.middleMiddle}>
-                        {currentUserInfo.avatar && <Image style={userInfo.middleMiddleImage} source={{uri: currentUserInfo.avatar}}/>}
+                    <View style={userInfoStyles.middleMiddle}>
+                        {currentUserInfo.avatar && <Image style={userInfoStyles.middleMiddleImage} source={{uri: currentUserInfo.avatar}}/>}
                     </View>
-                    <View style={userInfo.middleRight}>
-                        <Text style={userInfo.text}>Following</Text>
-                        <FollowCountText count={currentUserInfo.followingCount} style={userInfo.text}/>
+                    <View style={userInfoStyles.middleRight}>
+                        <Text style={userInfoStyles.text}>Following</Text>
+                        <FollowCountText count={currentUserInfo.followingCount} style={userInfoStyles.text}/>
                     </View>
                 </View>
-                <View style={userInfo.preBottom}>
-                    <View style={userInfo.preBottomLeft}>
+                <View style={userInfoStyles.preBottom}>
+                    <View style={userInfoStyles.preBottomLeft}>
                         <Icon name="account-circle"/>
                     </View>
-                    <View style={userInfo.preBottomMiddle}>
-                        <View style={userInfo.preBottomMiddleWrapper}>
-                            <Text style={userInfo.displayName}>{currentUserInfo.displayName}</Text>
+                    <View style={userInfoStyles.preBottomMiddle}>
+                        <View style={userInfoStyles.preBottomMiddleWrapper}>
+                            <Text style={userInfoStyles.displayName}>{currentUserInfo.displayName}</Text>
                         </View>
                     </View>
-                    <View style={userInfo.preBottomRight}>
+                    <View style={userInfoStyles.preBottomRight}>
                         <Icon name="music-note"/>
                     </View>
                 </View>
-                <View style={userInfo.bottom}>
+                <View style={userInfoStyles.bottom}>
                 </View>
-                {/* <View style={{ width: '100%',backgroundColor: "red" }}>
-                    <Text>Test</Text>
-                </View> */}
+                <Hr />
+                <View style={{ width: '100%', flexBasis: 1 }}>
+                    {postsLoading ? <Loading /> : (
+                        <>
+                        <Text style={[defText, postsAdditionalStyles.postsText]}>Posts</Text>
+                        <View style={postsAdditionalStyles.postsWrapper}>
+                            {userPosts.map((pst) => {
+                                return(
+                                    <Post pst={pst} key={pst.id} onLikePress={onLikePress} onImageDoubleTap={onImageDoubleTap} navigation={navigation} previousScreenName={route.name}/>
+                            )})}    
+                        </View>
+                        </>
+                    )}
+                </View>
             </ScrollView>
         </SafeAreaView>
     )
 }
 
-const userInfo = StyleSheet.create({
+const userInfoStyles = StyleSheet.create({
     text:{
         textAlign: 'center',
         fontFamily: 'Rubik'
@@ -78,14 +123,14 @@ const userInfo = StyleSheet.create({
     displayName:{
         fontSize: 15,
         fontFamily: 'Rubik',
-        textAlign: 'center'
+        textAlign: 'center',
     },
     main: {
         flex: 4,
     },
     top:{
         display: 'flex',
-        marginTop: 30,
+        marginTop: 10,
     },
     topMiddle:{
         flexDirection: 'row',
@@ -93,19 +138,14 @@ const userInfo = StyleSheet.create({
         justifyContent: 'center'
     },
     verifiedIcon: {
-        shadowColor: "#F580F8",
-        shadowOffset: {
-        width: 0,
-        height: 18,
-        },
-        shadowOpacity:  0.25,
-        shadowRadius: 20.00,
-        elevation: 24
+        width: 30,
+        height: 30,
     },
     topMiddleUsernameText:{
         fontSize: 20,
         marginHorizontal: 10,
-        fontFamily: 'Rubik'
+        fontFamily: 'Rubik',
+        
     },
     middle:{
         flexDirection: 'row',
@@ -122,13 +162,14 @@ const userInfo = StyleSheet.create({
         height: 100,
         marginHorizontal: 20,
         borderRadius: 20,
-        textAlign: 'center'
+        textAlign: 'center',
     },
     middleMiddleImage:{
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
         borderRadius: 20,
+        overlayColor: '#FFFFFF'
     },
     middleRight:{
         marginHorizontal: 20,
@@ -159,6 +200,18 @@ const userInfo = StyleSheet.create({
     bottomMiddle:{
 
     }   
+});
+
+const postsAdditionalStyles = StyleSheet.create({
+    postsText: {
+        alignSelf: 'center'
+    },
+    postsWrapper:{
+        marginBottom: 30,
+        marginTop: 10,
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
 });
 
 export default Profile

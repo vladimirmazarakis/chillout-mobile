@@ -10,6 +10,7 @@ import Hr from '../comps/Hr';
 import { BasicButtonGradient, BasicTextInput } from '../shared/Inputs';
 import { useUsers } from '../hooks/firestoreHooks';
 import useValidations from '../shared/Validations'
+import { Loading } from '../comps/Loading';
 
 const EditProfile = ({navigation}) => {
   const {currentUserInfo, currentUser, updateCurrentUserInfo} = useAuth();
@@ -21,10 +22,6 @@ const EditProfile = ({navigation}) => {
   const [error, setError] = useState('');
   const {validateUsername} = useValidations();
 
-  if(!currentUser){
-    
-  }
-
   useEffect(() => {
     if(currentUserInfo){
       setLoading(false);
@@ -32,6 +29,7 @@ const EditProfile = ({navigation}) => {
   }, [currentUserInfo]);
 
   const handleImageUpload = async() => {
+    setLoading(true);
     let options = {
       mediaType: 'photo',
       selectionLimit: 1
@@ -46,10 +44,21 @@ const EditProfile = ({navigation}) => {
     if(!result.cancelled){
       await uploadAvatar(currentUserInfo.username,result.uri);
       updateCurrentUserInfo();
+      setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleProfileInfoSave = async() => {
+    setLoading(true);
+    if(!username && !displayName){
+      setLoading(false);
+      return;
+    } 
+    if(username === currentUserInfo.username && displayName === currentUserInfo.displayName){
+      setLoading(false);
+      return;
+    }
     if(username && displayName){
       if(username !== currentUserInfo.username){
         var usernameCorrect = await validateUsername(username);
@@ -58,6 +67,7 @@ const EditProfile = ({navigation}) => {
         } 
         else{
           setError('Username not valid.');
+          setLoading(false);
           return; 
         }
       }
@@ -65,22 +75,23 @@ const EditProfile = ({navigation}) => {
         await updateUserDisplayName(currentUserInfo.username, displayName);
       }
     }
+    setLoading(false);
     updateCurrentUserInfo();
     navigation.navigate('Profile');
   };
 
   return (
     <>
-    {loading ? (
-    <ActivityIndicator size="large" color="green" style={{alignSelf: 'center'}}/>
-    ) : (
+      {loading ? 
+      <Loading /> :
+      (
       <SafeAreaView style={container}>
         <ScrollView>
           <View style={styles.profileAvatarView}>
             <View style={styles.profileAvatarImageView}>
               <Image style={styles.profileAvatarImage} source={{uri: currentUserInfo.avatar}}/>
               <Pressable style={styles.profileAvatarEditImage} onPress={handleImageUpload}>
-                <BlurView tint="light" intensity={50} style={{width: 100, height: 100, position: 'absolute', borderRadius: 20}}/>
+                <BlurView tint="light" intensity={5} style={{width: 100, height: 100, position: 'absolute', borderRadius: 20}}/>
                 <Icon style={styles.profileAvatarEditImageText} color="white" name="edit"/>
               </Pressable>
             </View>
@@ -106,7 +117,7 @@ const styles = StyleSheet.create({
   profileAvatarView:{
     width: '100%',
     marginTop: 40,
-    position: 'relative'
+    position: 'relative',
   },
   profileAvatarImageView:{
     alignSelf: 'center',
@@ -118,6 +129,7 @@ const styles = StyleSheet.create({
     height: 100,
     resizeMode: 'cover',
     borderRadius: 20,
+    overlayColor: '#FFFFFF',
     zIndex: 0
   },
   profileAvatarEditImage:{

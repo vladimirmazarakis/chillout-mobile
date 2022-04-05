@@ -11,29 +11,35 @@ import PropTypes from 'prop-types';
 import { Icon } from 'react-native-elements';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Home from '../screens/Home';
+import PostDiscussion from '../screens/PostDiscussion';
 
 
 const StackScreens = ({stack, tab}) => {
     const {currentUser} = useAuth();
-    const ICON_SIZE = 30;
+    const ICON_SIZE = 27;
     const TAB_NAV_SCREEN_OPTIONS = {
         headerShown: false,
         tabBarStyle: styles.tabBarStyle,
         tabBarActiveTintColor: '#F580F8',
         tabBarInactiveTintColor: '#000000',
-        tabBarHideOnKeyboard: true
+        tabBarHideOnKeyboard: true,
+        tabBarShowLabel: false
+    };
+    const HIDDEN_TABS_OPTIONS = {
+        tabBarButton: () => null
     };
     return (
         <>
             {currentUser ? (
             <>
-            <tab.Navigator tabBarOptions={{ showLabel: false }} screenOptions={TAB_NAV_SCREEN_OPTIONS}>
+            <tab.Navigator screenOptions={TAB_NAV_SCREEN_OPTIONS}>
                 <tab.Screen name="Home" component={Home} options={{tabBarIcon: ({color}) => (<Icon name="home" color={color} size={ICON_SIZE} />)}} />
                 <tab.Screen name="Search" component={EditProfile} options={{tabBarIcon: ({color}) => (<Icon name="search" color={color} size={ICON_SIZE} />)}} />
                 <tab.Screen name="Upload" component={Profile} options={{tabBarIcon: ({color}) => (<AntDesign name="plus" color={color} size={ICON_SIZE} />)}} />
                 <tab.Screen name="Direct" component={Profile} options={{tabBarIcon: ({color}) => (<Icon name="send" color={color} size={ICON_SIZE} />)}} />
                 <tab.Screen name="Profile" component={Profile} options={{tabBarIcon: ({color}) => (<AntDesign name="user" color={color} size={ICON_SIZE} />)}}/>
-                <tab.Screen name="EditProfile" component={EditProfile} options={{tabBarButton: () => null}}/>
+                <tab.Screen name="EditProfile" component={EditProfile} options={HIDDEN_TABS_OPTIONS}/>
+                <tab.Screen name="PostDiscussion" component={PostDiscussion} options={HIDDEN_TABS_OPTIONS}/>
             </tab.Navigator>
             </>
             )
@@ -52,8 +58,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         width: '90%',
         alignSelf: 'center',
-        position: 'absolute',
-        left:'5%',
+        position: 'relative',
         bottom: 2,
         backgroundColor: '#E5E5E5',
         shadowColor: "#000000",

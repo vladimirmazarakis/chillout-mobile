@@ -57,7 +57,9 @@ const AuthProvider = ({children}) => {
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, user => {
             setCurrentUser(user);
-            getUserInfo(user);
+            if(user){
+                getUserInfo(user);
+            }
             setLoading(false);
         });
         const getUserInfo = async(user) => {

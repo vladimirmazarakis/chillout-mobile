@@ -1,4 +1,4 @@
-import { collection, query, onSnapshot, addDoc, where, getDocs, getDoc, setDoc, doc, FieldValue, updateDoc, increment, Timestamp, serverTimestamp, deleteDoc } from "firebase/firestore"
+import { collection, query, onSnapshot, addDoc, where, getDocs, getDoc, setDoc, doc, FieldValue, updateDoc, increment, Timestamp, serverTimestamp, deleteDoc, orderBy } from "firebase/firestore"
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { firestore } from "../firebase/config"
@@ -161,4 +161,52 @@ const useUsers = () => {
 
     return { getUsers, addUser, userExists, getUserByEmail, getUserByUsername, followUser, unfollowUser, isFollowingUser, updateUserAvatar, updateUserUsername, updateUserDisplayName }
 }
-export { useUsers }
+
+const usePosts = (username) => {
+    const [posts, setPosts] = useState([]);
+
+    const getUserPosts = async(userRequesting, username) => {
+        let userQry = query(collection(firestore, `users`), where("username", "==", username));
+        let user = (await getDocs(userQry)).docs[0];
+        if(!user){
+            return;
+        }
+        let postsQry = query(collection(firestore, user.ref.path + '/posts'), orderBy("timestamp", "desc"));
+        let postsQSnapshot = await getDocs(postsQry);
+        let posts = [];
+        await Promise.all(postsQSnapshot.docs.map(async(docm) => {
+            let likes = await likesPost(userRequesting, docm.ref.path);
+            let post = {
+                id: docm.id,
+                path: docm.ref.path,
+                ...docm.data(),
+                likes: likes
+            };
+            posts.push(post);
+        }));
+        return posts;
+    };
+
+    const likesPost = async(username, postPath) => {
+        let likes = (await getDoc(doc(firestore,postPath + `/likes/${username}`))).exists();
+        return likes;
+    };
+
+    const toggleLikeOnPost = async(username, postPath) => {
+        let post = await getDoc(doc(firestore, postPath));
+        let chechLike = await getDoc(doc(firestore, post.ref.path + `/likes/${username}`));
+        if(chechLike.exists()){
+            await deleteDoc(chechLike.ref);
+            return;
+        }
+        let likeObjectRef = doc(firestore, post.ref.path + `/likes/${username}`);
+        let likeObject = {
+            timestamp: serverTimestamp()
+        };
+        await setDoc(likeObjectRef, likeObject, username);
+    };
+
+    return {getUserPosts, toggleLikeOnPost};
+};
+
+export { useUsers, usePosts }
